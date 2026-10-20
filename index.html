@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Award Overlay Generator Pro</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --success-dark: #059669;
+            --gold: #FFD700;
+            --navy: #00308F;
+            
+            /* Light mode */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border: #334155;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(51, 65, 85, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow);
+        }
+
+        .theme-icon {
+            font-size: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 60px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold) 0%, #FFA500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .card-title {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .mode-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 14px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 700;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .mode-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .upload-area {
+            border: 3px dashed var(--border);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+            margin-bottom: 16px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--bg-tertiary);
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--success);
+            background: var(--bg-tertiary);
+            transform: scale(1.05);
+        }
+
+        .upload-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            animation: bounce 2s infinite;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .upload-text strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .preview-container {
+            position: relative;
+            width: 100%;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            overflow: hidden;
+            display: none;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .preview-container.active {
+            display: block;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 5/7;
+            overflow: hidden;
+            cursor: move;
+            background: #f0f0f0;
+            user-select: none;
+        }
+
+        .canvas-container.dragging {
+            cursor: grabbing;
+        }
+
+        .preview-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls-panel {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .control-input {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            margin: 0;
+        }
+
+        .clear-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            z-index: 10;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .clear-btn:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.05);
+        }
+
+        .btn {
+            border: none;
+            padding: 16px 24px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .year-input-group {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal img {
+            border: 4px solid white;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 80vh;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: zoomIn 0.4s ease;
+        }
+
+        .modal-msg {
+            color: var(--success);
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(16, 185, 129, 0.5);
+            animation: fadeInDown 0.5s ease;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            color: white;
+            font-size: 48px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+            transform: scale(1.2) rotate(90deg);
+        }
+
+        .instructions {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 28px;
+            border-radius: 20px;
+            margin-top: 30px;
+            box-shadow: 0 8px 32px var(--shadow);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .instructions h3 {
+            color: var(--gold);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .instructions ol {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            padding-left: 24px;
+        }
+
+        .instructions li {
+            margin-bottom: 12px;
+        }
+
+        .instructions strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .instructions ul {
+            margin-top: 8px;
+            padding-left: 24px;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .controls-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        #hiddenCanvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <span id="themeText">Dark</span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Award Overlay Generator Pro</h1>
+            <p class="subtitle">Professional 5x7 Award Certificates with Advanced Photo Controls</p>
+        </div>
+
+        <div class="workflow">
+            <!-- Step 1: Upload & Adjust Photo -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-number">1</div>
+                    <h2 class="card-title">Upload & Adjust Photo</h2>
+                </div>
+                
+                <input type="file" id="photoInput" accept="image/*" style="display:none;">
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">
+                        <strong>Click to upload</strong> or drag and drop<br>
+                        <small>Supports JPG, PNG • Best: 5x7 ratio (1000x1400px)</small>
+                    </div>
+                </div>
+
+                <div class="preview-container" id="previewContainer">
+                    <button class="clear-btn" id="clearBtn">✕ Clear Photo</button>
+                    <div class="canvas-container" id="canvasContainer">
+                        <canvas id="previewCanvas"></canvas>
+                    </div>
+                    <div class="controls-panel">
+                        <div class="control-group">
+                            <span class="control-label">Zoom</span>
+                            <div class="control-row">
+                                <button class="control-btn" onclick="adjustZoom(-0.1)">−</button>
+                                <input type="number" class="control-input" id="zoomInput" value="100" min="50" max="200" step="10" onchange="setZoom(this.value)">
+                                <button class="control-btn" onclick="adjustZoom(0.1)">+</button>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <span class="control-label">Rotate</span>
+                            <div class="control-row">
+                                <button class="control-btn" onclick="adjustRotation(-5)">↶</button>
+                                <input type="number" class="control-input" id="rotateInput" value="0" min="-45" max="45" step="5" onchange="setRotation(this.value)">
+                                <button class="control-btn" onclick="adjustRotation(5)">↷</button>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <span class="control-label">Position</span>
+                            <div class="control-row">
+                                <button class="control-btn" onclick="adjustPosition(0, -10)">↑</button>
+                                <button class="control-btn" onclick="adjustPosition(-10, 0)">←</button>
+                                <button class="control-btn" onclick="adjustPosition(10, 0)">→</button>
+                                <button class="control-btn" onclick="adjustPosition(0, 10)">↓</button>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <span class="control-label">Reset</span>
+                            <button class="btn btn-secondary" onclick="resetTransforms()" style="margin: 0;">Reset All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Award Details -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-number">2</div>
+                    <h2 class="card-title">Award Details</h2>
+                </div>
+
+                <label class="label">Award Type</label>
+                <div class="mode-row">
+                    <button class="mode-btn active" id="btnQ" onclick="setMode('Quarterly')">Quarterly</button>
+                    <button class="mode-btn" id="btnA" onclick="setMode('Annual')">Annual</button>
+                </div>
+
+                <label class="label">Award Category</label>
+                <!-- FIXED: call handleAwardChange() on change -->
+                <select id="awardSelect" onchange="handleAwardChange()"></select>
+                
+                <input type="text" id="customAwardInput" placeholder="Enter custom award title..." style="display:none;">
+
+                <label class="label">Time Period</label>
+                <div class="year-input-group">
+                    <select id="quarterSelect" style="display:none;">
+                        <option value="1st Quarter">1st Quarter</option>
+                        <option value="2nd Quarter">2nd Quarter</option>
+                        <option value="3rd Quarter">3rd Quarter</option>
+                        <option value="4th Quarter" selected>4th Quarter</option>
+                    </select>
+                    <input type="number" id="yearInput" min="2020" max="2099" placeholder="Year">
+                </div>
+
+                <label class="label">Winner Name <span style="font-size: 11px; font-weight: 400;">(Optional for 'Unavailable')</span></label>
+                <input type="text" id="nameInput" placeholder="RANK FIRST LAST" style="font-weight:bold;">
+            </div>
+
+            <!-- Step 3: Generate -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-number">3</div>
+                    <h2 class="card-title">Generate Award</h2>
+                </div>
+
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+                    Choose your output format based on your workflow:
+                </p>
+
+                <div class="tooltip">
+                    <button class="btn btn-primary" id="generateWithPhotoBtn" onclick="generateWithPhoto()" disabled>
+                        🖼️ Generate with Photo
+                    </button>
+                    <span class="tooltiptext">Combines your photo with overlay</span>
+                </div>
+
+                <div class="tooltip">
+                    <button class="btn btn-secondary" onclick="generateOverlay()">
+                        🎨 Transparent Overlay Only
+                    </button>
+                    <span class="tooltiptext">For pasting over photos in Word</span>
+                </div>
+
+                <div class="tooltip">
+                    <button class="btn btn-secondary" onclick="generateUnavailableOverlay()">
+                        📋 'Photo Unavailable' Award
+                    </button>
+                    <span class="tooltiptext">Standalone award without photo</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📖 How to Use This Tool</h3>
+            <ol>
+                <li><strong>Upload Photo:</strong> Click or drag-and-drop the winner's photo (recommended: 5x7 ratio, 1000x1400px)</li>
+                <li><strong>Adjust Photo:</strong> Use zoom, rotation, and position controls to perfectly frame the subject. You can also drag the photo directly with your mouse.</li>
+                <li><strong>Configure Award:</strong> Select award type, category, time period (year is auto-filled), and winner name</li>
+                <li><strong>Generate:</strong> Choose your output:
+                    <ul>
+                        <li><strong>With Photo:</strong> Complete award ready to print</li>
+                        <li><strong>Overlay Only:</strong> Transparent overlay for Word workflow</li>
+                        <li><strong>Photo Unavailable:</strong> Standalone award</li>
+                    </ul>
+                </li>
+                <li><strong>Save:</strong> Right-click → "Copy Image" or "Save Image As"</li>
+            </ol>
+            
+            <h3 style="margin-top: 24px;">💡 Pro Tips</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li>✓ Use high-resolution photos (at least 1000x1400px)</li>
+                <li>✓ Ensure good lighting and contrast</li>
+                <li>✓ Position subject's head below the top gold bar</li>
+                <li>✓ Use keyboard arrow keys for fine position adjustments (Shift for larger steps)</li>
+                <li>✓ Drag the photo directly in the preview for quick positioning</li>
+                <li>✓ Save as PNG to preserve quality</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="modal" id="resultModal">
+        <div class="close-btn" onclick="closeModal()">×</div>
+        <div class="modal-msg">✅ Right Click → Copy/Save Image</div>
+        <img id="finalImage" alt="Generated Award">
+    </div>
+
+    <canvas id="hiddenCanvas"></canvas>
+
+    <script>
+        const AWARDS = {
+            Quarterly: [
+                "Airman of the Quarter",
+                "Airman Maintenance Professional of the Quarter",
+                "Airman Maintenance Support Professional of the Quarter",
+                "NCO of the Quarter",
+                "NCO Maintenance Professional of the Quarter",
+                "NCO Maintenance Support Professional of the Quarter",
+                "SNCO of the Quarter",
+                "SNCO Maintenance Professional of the Quarter",
+                "SNCO Maintenance Support Professional of the Quarter",
+                "Team of the Quarter",
+                "Volunteer of the Quarter",
+                "Custom Award..."
+            ],
+            Annual: [
+                "Airman of the Year",
+                "NCO of the Year",
+                "SNCO of the Year",
+                "Team of the Year",
+                "Innovation of the Year",
+                "Custom Award..."
+            ]
+        };
+
+        let currentMode = 'Quarterly';
+        let uploadedImage = null;
+        let photoTransform = {
+            x: 0,
+            y: 0,
+            scale: 1,
+            rotation: 0
+        };
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let previewDimensions = { width: 0, height: 0 };
+
+        // Theme Management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            
+            if (newTheme === 'dark') {
+                icon.textContent = '🌙';
+                text.textContent = 'Dark';
+            } else {
+                icon.textContent = '☀️';
+                text.textContent = 'Light';
+            }
+            
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme
+        window.onload = function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeIcon').textContent = '🌙';
+                document.getElementById('themeText').textContent = 'Dark';
+            }
+            
+            setMode('Quarterly');
+            document.getElementById('yearInput').value = new Date().getFullYear();
+            setupUploadHandlers();
+            setupCanvasInteraction();
+        };
+
+        function setupUploadHandlers() {
+            const uploadArea = document.getElementById('uploadArea');
+            const photoInput = document.getElementById('photoInput');
+            const clearBtn = document.getElementById('clearBtn');
+
+            uploadArea.addEventListener('click', () => photoInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    handleImageUpload(file);
+                }
+            });
+
+            photoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleImageUpload(file);
+                }
+            });
+
+            clearBtn.addEventListener('click', clearImage);
+        }
+
+        function setupCanvasInteraction() {
+            const container = document.getElementById('canvasContainer');
+            
+            container.addEventListener('mousedown', startDrag);
+            container.addEventListener('mousemove', drag);
+            container.addEventListener('mouseup', endDrag);
+            container.addEventListener('mouseleave', endDrag);
+            
+            // Touch support
+            container.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrag({ 
+                    clientX: touch.clientX,
+                    clientY: touch.clientY 
+                });
+            });
+            
+            container.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                drag({ 
+                    clientX: touch.clientX,
+                    clientY: touch.clientY 
+                });
+            });
+            
+            container.addEventListener('touchend', endDrag);
+
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                if (!uploadedImage) return;
+                
+                const step = e.shiftKey ? 20 : 5;
+                switch(e.key) {
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        adjustPosition(0, -step);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        adjustPosition(0, step);
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        adjustPosition(-step, 0);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        adjustPosition(step, 0);
+                        break;
+                }
+            });
+        }
+
+        function startDrag(e) {
+            if (!uploadedImage) return;
+            isDragging = true;
+            const container = document.getElementById('canvasContainer');
+            container.classList.add('dragging');
+            dragStart = {
+                x: e.clientX - photoTransform.x,
+                y: e.clientY - photoTransform.y
+            };
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            photoTransform.x = e.clientX - dragStart.x;
+            photoTransform.y = e.clientY - dragStart.y;
+            updatePreview();
+        }
+
+        function endDrag() {
+            if (isDragging) {
+                isDragging = false;
+                const container = document.getElementById('canvasContainer');
+                container.classList.remove('dragging');
+            }
+        }
+
+        function handleImageUpload(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    uploadedImage = img;
+                    resetTransforms();
+                    document.getElementById('previewContainer').classList.add('active');
+                    document.getElementById('uploadArea').style.display = 'none';
+                    document.getElementById('generateWithPhotoBtn').disabled = false;
+                    updatePreview();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updatePreview() {
+            if (!uploadedImage) return;
+
+            const canvas = document.getElementById('previewCanvas');
+            const container = document.getElementById('canvasContainer');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas to match container size
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            
+            // Store dimensions for later calculations
+            previewDimensions = {
+                width: canvas.width,
+                height: canvas.height
+            };
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate scale to fill canvas
+            const scaleX = canvas.width / uploadedImage.width;
+            const scaleY = canvas.height / uploadedImage.height;
+            const baseScale = Math.max(scaleX, scaleY);
+            
+            // Apply transformations
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.translate(photoTransform.x, photoTransform.y);
+            ctx.rotate(photoTransform.rotation * Math.PI / 180);
+            ctx.scale(photoTransform.scale, photoTransform.scale);
+            
+            const scaledWidth = uploadedImage.width * baseScale;
+            const scaledHeight = uploadedImage.height * baseScale;
+            
+            ctx.drawImage(uploadedImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+            ctx.restore();
+        }
+
+        function adjustZoom(delta) {
+            photoTransform.scale = Math.max(0.5, Math.min(2, photoTransform.scale + delta));
+            document.getElementById('zoomInput').value = Math.round(photoTransform.scale * 100);
+            updatePreview();
+        }
+
+        function setZoom(value) {
+            photoTransform.scale = Math.max(0.5, Math.min(2, value / 100));
+            updatePreview();
+        }
+
+        function adjustRotation(delta) {
+            photoTransform.rotation = Math.max(-45, Math.min(45, photoTransform.rotation + delta));
+            document.getElementById('rotateInput').value = photoTransform.rotation;
+            updatePreview();
+        }
+
+        function setRotation(value) {
+            photoTransform.rotation = Math.max(-45, Math.min(45, parseInt(value)));
+            updatePreview();
+        }
+
+        function adjustPosition(dx, dy) {
+            photoTransform.x += dx;
+            photoTransform.y += dy;
+            updatePreview();
+        }
+
+        function resetTransforms() {
+            photoTransform = { x: 0, y: 0, scale: 1, rotation: 0 };
+            document.getElementById('zoomInput').value = 100;
+            document.getElementById('rotateInput').value = 0;
+            updatePreview();
+        }
+
+        function clearImage() {
+            uploadedImage = null;
+            photoTransform = { x: 0, y: 0, scale: 1, rotation: 0 };
+            document.getElementById('previewContainer').classList.remove('active');
+            document.getElementById('uploadArea').style.display = 'block';
+            document.getElementById('photoInput').value = '';
+            document.getElementById('generateWithPhotoBtn').disabled = true;
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btnQ').className = (mode === 'Quarterly') ? 'mode-btn active' : 'mode-btn';
+            document.getElementById('btnA').className = (mode === 'Annual') ? 'mode-btn active' : 'mode-btn';
+            
+            const quarterSelect = document.getElementById('quarterSelect');
+            quarterSelect.style.display = (mode === 'Quarterly') ? 'block' : 'none';
+            
+            const select = document.getElementById('awardSelect');
+            select.innerHTML = '';
+            AWARDS[mode].forEach(award => {
+                let opt = document.createElement('option');
+                opt.value = award;
+                opt.innerText = award;
+                select.appendChild(opt);
+            });
+            
+            handleAwardChange();
+        }
+
+        function handleAwardChange() {
+            const select = document.getElementById('awardSelect');
+            const customInput = document.getElementById('customAwardInput');
+            customInput.style.display = (select.value === 'Custom Award...') ? 'block' : 'none';
+        }
+
+        function getDateString() {
+            const year = document.getElementById('yearInput').value || new Date().getFullYear();
+            if (currentMode === 'Quarterly') {
+                const quarter = document.getElementById('quarterSelect').value;
+                return `${quarter} ${year}`;
+            }
+            return year;
+        }
+
+        function generateWithPhoto() {
+            if (!uploadedImage) {
+                alert('Please upload a photo first!');
+                return;
+            }
+
+            const canvas = document.getElementById('hiddenCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = 800, H = 1120;
+            canvas.width = W;
+            canvas.height = H;
+
+            // Solid black background layer
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, W, H);
+
+            // Calculate scale factors from preview to final
+            const scaleFactorX = W / previewDimensions.width;
+            const scaleFactorY = H / previewDimensions.height;
+
+            // Calculate base scale to fill canvas
+            const scaleX = W / uploadedImage.width;
+            const scaleY = H / uploadedImage.height;
+            const baseScale = Math.max(scaleX, scaleY);
+
+            // Apply transformations with proper scaling
+            ctx.save();
+            ctx.translate(W / 2, H / 2);
+            ctx.translate(photoTransform.x * scaleFactorX, photoTransform.y * scaleFactorY);
+            ctx.rotate(photoTransform.rotation * Math.PI / 180);
+            ctx.scale(photoTransform.scale, photoTransform.scale);
+            
+            const scaledWidth = uploadedImage.width * baseScale;
+            const scaledHeight = uploadedImage.height * baseScale;
+            
+            ctx.drawImage(uploadedImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+            ctx.restore();
+
+            // Draw overlay on top of photo + black background
+            drawOverlay(ctx, W, H);
+
+            showResult(canvas);
+        }
+
+        function generateOverlay() {
+            const canvas = document.getElementById('hiddenCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = 800, H = 1120;
+            canvas.width = W;
+            canvas.height = H;
+
+            ctx.clearRect(0, 0, W, H);
+            drawOverlay(ctx, W, H);
+
+            showResult(canvas);
+        }
+
+        function drawOverlay(ctx, W, H) {
+            // Gold header bar
+            ctx.fillStyle = "#FFD700";
+            ctx.fillRect(0, 0, W, 120);
+
+            // Header text
+            ctx.fillStyle = "#00308F";
+            ctx.font = "900 32px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(`702 MXS ${currentMode.toUpperCase()} AWARD WINNER`, W / 2, 60);
+
+            // Gradient footer
+            const grad = ctx.createLinearGradient(0, H - 450, 0, H);
+            grad.addColorStop(0, "transparent");
+            grad.addColorStop(0.5, "rgba(0,30,90,0.85)");
+            grad.addColorStop(1, "rgba(0,10,40,1)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, H - 450, W, 450);
+
+            // Shadow effect
+            ctx.shadowColor = "black";
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 3;
+
+            // Award text
+            let awardText = document.getElementById('awardSelect').value;
+            if (awardText === 'Custom Award...') {
+                awardText = document.getElementById('customAwardInput').value || "CUSTOM AWARD";
+            }
+
+            let awardFontSize = 48;
+            ctx.font = `bold ${awardFontSize}px Arial`;
+            while (ctx.measureText(awardText.toUpperCase()).width > W * 0.9 && awardFontSize > 20) {
+                awardFontSize--;
+                ctx.font = `bold ${awardFontSize}px Arial`;
+            }
+            ctx.fillStyle = "white";
+            ctx.fillText(awardText.toUpperCase(), W / 2, H - 280);
+
+            // Winner name
+            const winnerName = (document.getElementById('nameInput').value || "RANK FIRST LAST").toUpperCase();
+            let winnerFontSize = 60;
+            ctx.font = `900 ${winnerFontSize}px Arial Black`;
+            while (ctx.measureText(winnerName).width > W * 0.95 && winnerFontSize > 20) {
+                winnerFontSize--;
+                ctx.font = `900 ${winnerFontSize}px Arial Black`;
+            }
+            ctx.fillStyle = "#FFD700";
+            ctx.fillText(winnerName, W / 2, H - 180);
+
+            // Date
+            ctx.font = "600 24px Arial";
+            ctx.fillStyle = "#bae6fd";
+            ctx.shadowBlur = 4;
+            ctx.fillText(getDateString(), W / 2, H - 120);
+        }
+
+        function generateUnavailableOverlay() {
+            const canvas = document.getElementById('hiddenCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = 800, H = 1120;
+            canvas.width = W;
+            canvas.height = H;
+
+            // White background
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, W, H);
+
+            // "Photo Unavailable" text
+            ctx.fillStyle = "#6c757d";
+            ctx.font = "bold 70px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("PHOTO UNAVAILABLE", W / 2, H / 2 - 100);
+
+            // Award text
+            let awardText = document.getElementById('awardSelect').value;
+            if (awardText === 'Custom Award...') {
+                awardText = document.getElementById('customAwardInput').value || "CUSTOM AWARD";
+            }
+
+            let awardFontSize = 48;
+            ctx.font = `bold ${awardFontSize}px Arial`;
+            while (ctx.measureText(awardText.toUpperCase()).width > W * 0.9 && awardFontSize > 20) {
+                awardFontSize--;
+                ctx.font = `bold ${awardFontSize}px Arial`;
+            }
+            ctx.fillStyle = "#00308F";
+            ctx.fillText(awardText.toUpperCase(), W / 2, H - 280);
+
+            // Winner name
+            const winnerName = document.getElementById('nameInput').value.toUpperCase();
+            if (winnerName) {
+                let winnerFontSize = 60;
+                ctx.font = `900 ${winnerFontSize}px Arial Black`;
+                while (ctx.measureText(winnerName).width > W * 0.95 && winnerFontSize > 20) {
+                    winnerFontSize--;
+                    ctx.font = `900 ${winnerFontSize}px Arial Black`;
+                }
+                ctx.fillStyle = "black";
+                ctx.fillText(winnerName, W / 2, H - 180);
+            }
+
+            // Date
+            ctx.font = "600 24px Arial";
+            ctx.fillStyle = "#495057";
+            ctx.fillText(getDateString(), W / 2, H - 120);
+
+            showResult(canvas);
+        }
+
+        function showResult(canvas) {
+            document.getElementById('finalImage').src = canvas.toDataURL('image/png');
+            document.getElementById('resultModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.remove('active');
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
+```...
